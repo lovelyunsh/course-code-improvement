@@ -22,7 +22,6 @@ import com.sparta.course.domain.lecture.model.Lecture
 import com.sparta.course.domain.lecture.model.toResponse
 import com.sparta.course.domain.lecture.repository.LectureRepository
 import com.sparta.course.domain.user.repository.UserRepository
-import com.sparta.course.infra.aop.StopWatch
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -46,6 +45,20 @@ class CourseServiceImpl(
         }
 
         return courseRepository.findByPageableAndStatus(pageable, courseStatus).map { it.toResponse() }
+    }
+
+    override fun searchCourseList(userId: Long, status: String?): List<CourseResponse> {
+        val courseApplicationStatus = when (status) {
+            "ACCEPTED" -> CourseApplicationStatus.ACCEPTED
+            "PENDING" -> CourseApplicationStatus.PENDING
+            "REJECTED" -> CourseApplicationStatus.REJECTED
+            null -> null
+            else -> throw IllegalArgumentException("The status is invalid");
+        }
+
+        return courseApplicationRepository
+            .searchCourseApplicationByUserIdAndStatus(userId, courseApplicationStatus)
+            .map { it.toResponse() }
     }
 
     override fun searchCourseList(title: String): List<CourseResponse> {

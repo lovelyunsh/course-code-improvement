@@ -38,6 +38,17 @@ class CourseController(
             .body(courseService.searchCourseList(title))
     }
 
+    @GetMapping("/search/user/{userId}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('STUDENT')")
+    fun searchCourseList(
+        @PathVariable(name = "userId") userId: Long,
+        @RequestParam(name = "status") status: String?
+    ): ResponseEntity<List<CourseResponse>> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(courseService.searchCourseList(userId, status))
+    }
+
     @GetMapping("/{courseId}")
     @PreAuthorize("hasRole('TUTOR') or hasRole('STUDENT')")
     fun getCourse(@PathVariable courseId: Long): ResponseEntity<CourseResponse> {
