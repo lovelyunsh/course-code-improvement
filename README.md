@@ -1,4 +1,4 @@
-# <strong>Spring Backend 코드 개선 과제</strong>
+# <strong>📚Spring Backend 코드 개선 과제</strong>
 
 
 ## 과제 개요
@@ -18,7 +18,7 @@
 - [github project](https://github.com/users/lovelyunsh/projects/2)
 
 
-## **📚기술스택**
+## **기술스택**
 
 ### **Backend**
 
