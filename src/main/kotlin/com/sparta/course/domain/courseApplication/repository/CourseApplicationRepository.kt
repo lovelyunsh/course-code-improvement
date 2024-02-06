@@ -3,7 +3,7 @@ package com.sparta.course.domain.courseApplication.repository
 import com.sparta.course.domain.courseApplication.model.CourseApplication
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface CourseApplicationRepository : JpaRepository<CourseApplication, Long> {
+interface CourseApplicationRepository : JpaRepository<CourseApplication, Long>,CustomCourseApplicationRepository {
 
     fun existsByCourseIdAndUserId(courseId: Long, userId: Long): Boolean
 

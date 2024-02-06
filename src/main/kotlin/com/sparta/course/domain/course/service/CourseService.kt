@@ -17,6 +17,8 @@ interface CourseService {
     // title을 contain하는 course 데이터 반환
     fun searchCourseList(title: String): List<CourseResponse>
 
+    fun searchCourseList(userId: Long,status: String?): List<CourseResponse>
+
     // status 값이 일치하는 course 데이터에 paging 한 list를 반환
     fun getPaginatedCourseList(pageable: Pageable, status: String?): Page<CourseResponse>
 
