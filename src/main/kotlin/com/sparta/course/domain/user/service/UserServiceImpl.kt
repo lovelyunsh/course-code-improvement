@@ -2,29 +2,31 @@ package com.sparta.course.domain.user.service
 
 import com.sparta.course.domain.exception.ModelNotFoundException
 import com.sparta.course.domain.user.dto.*
+import com.sparta.course.domain.user.exception.FormatException
 import com.sparta.course.domain.user.exception.InvalidCredentialException
 import com.sparta.course.domain.user.model.Profile
 import com.sparta.course.domain.user.model.User
 import com.sparta.course.domain.user.model.UserRole
 import com.sparta.course.domain.user.model.toResponse
 import com.sparta.course.domain.user.repository.UserRepository
+import com.sparta.course.domain.user.util.RegexFunc
 import com.sparta.course.infra.security.jwt.JwtPlugin
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtPlugin: JwtPlugin
+    private val jwtPlugin: JwtPlugin,
+    private val regexFunc: RegexFunc
 ) : UserService {
 
     override fun login(request: LoginRequest): LoginResponse {
         val user = userRepository.findByEmail(request.email) ?: throw ModelNotFoundException("User", null)
 
-        if (user.role.name != request.role || !passwordEncoder.matches(request.password, user.password) ) {
+        if (user.role.name != request.role || !passwordEncoder.matches(request.password, user.password)) {
             throw InvalidCredentialException()
         }
 
@@ -38,9 +40,9 @@ class UserServiceImpl(
     }
 
     override fun signUp(request: SignUpRequest): UserResponse {
-        if (userRepository.existsByEmail(request.email)) {
-            throw IllegalStateException("Email is already in use")
-        }
+        request.checkEmailFormat()
+            .checkPasswordFormat()
+            .checkEmailDuplication()
 
         return userRepository.save(
             User(
@@ -65,6 +67,29 @@ class UserServiceImpl(
         )
 
         return userRepository.save(user).toResponse()
+    }
+
+    private fun SignUpRequest.checkEmailFormat(): SignUpRequest {
+        if (!regexFunc.regexEmail(this.email)) {
+            throw FormatException("Please enter your email using the correct email format.")
+        }
+        return this
+    }
+
+    private fun SignUpRequest.checkPasswordFormat(): SignUpRequest {
+        if (!regexFunc.regexPassword(this.password)) {
+            throw FormatException(
+                "Please enter 8 to 15 characters including letters, numbers, and special characters."
+            )
+        }
+        return this
+    }
+
+    private fun SignUpRequest.checkEmailDuplication(): SignUpRequest {
+        if (userRepository.existsByEmail(this.email)) {
+            throw IllegalStateException("Email is already in use")
+        }
+        return this
     }
 
 }
